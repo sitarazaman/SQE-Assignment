@@ -1,63 +1,53 @@
 
 import pytest
 from requests.utils import to_native_string
-import csv
-from pathlib import Path
-
-@pytest.mark.order(1)
-def test_to_native_string():
-    result = to_native_string(b"hello")
-    assert result == "hello"
 
 
-def test_to_native_string():
-    result = to_native_string(b"hello")
-    assert result == "hello"
+@pytest.mark.utils
+def test_bytes_to_native_string():
+    assert to_native_string(b"hello") == "hello"
 
 
-def test_to_native_string_empty():
-    result = to_native_string(b"")
-    assert result == ""
+@pytest.mark.utils
+def test_string_remains_string():
+    assert to_native_string("hello") == "hello"
 
 
-def test_to_native_string_single_character():
-    result = to_native_string(b"a")
-    assert result == "a"
+@pytest.mark.utils
+def test_empty_bytes():
+    assert to_native_string(b"") == ""
 
 
-def test_to_native_string_word():
-    result = to_native_string(b"requests")
-    assert result == "requests"
+@pytest.mark.utils
+def test_empty_string():
+    assert to_native_string("") == ""
 
 
+@pytest.mark.utils
+def test_single_character():
+    assert to_native_string(b"A") == "A"
+
+
+@pytest.mark.utils
+def test_word_value():
+    assert to_native_string(b"requests") == "requests"
+
+
+@pytest.mark.utils
 @pytest.mark.parametrize(
-    "input_value, expected",
+    "value, expected",
     [
         (b"hello", "hello"),
-        (b"", ""),
-        (b"a", "a"),
         (b"requests", "requests"),
         (b"FAST", "FAST"),
+        (b"12345", "12345"),
+        (b"test case", "test case"),
     ],
 )
-def test_to_native_string_parameterized(input_value, expected):
-    assert to_native_string(input_value) == expected
+def test_parametrized_values(value, expected):
+    assert to_native_string(value) == expected
 
 
-
-def load_csv_test_data():
-    csv_path = Path(__file__).with_name("test_data.csv")
-
-    with open(csv_path, newline="", encoding="utf-8") as file:
-        return list(csv.DictReader(file))
-
-
-@pytest.mark.parametrize(
-    "input_value, expected",
-    [
-        (row["input_value"].encode("ascii"), row["expected"])
-        for row in load_csv_test_data()
-    ],
-)
-def test_to_native_string_from_csv(input_value, expected):
-    assert to_native_string(input_value) == expected
+@pytest.mark.utils
+def test_utf8_bytes():
+    assert to_native_string("café".encode("utf-8"), "utf-8") == "café"
